@@ -1,9 +1,14 @@
 <?php
+
 // Bu kısım, PHP kodunuzun başlangıcıdır.
+// Veritabanı bağlantısını dahil et
+include 'db.php'; // db.php dosyasını dahil ediyoruz
 
 // URL'den 'page' parametresini alıyoruz. Eğer yoksa, varsayılan olarak 'home' (ana sayfa) kabul ediyoruz.
 // Bu basit bir yönlendirme (routing) mekanizmasıdır.
+
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
+$slug = isset($_GET['slug']) ? $_GET['slug'] : ''; // Blog yazıları için slug parametresi
 
 // İletişim formu gönderildiğinde çalışacak PHP kodu
 $form_status_message = ''; // Kullanıcıya gösterilecek mesajı saklar
@@ -11,13 +16,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
     // Form verilerini alıyoruz ve güvenlik için temizliyoruz (XSS saldırılarına karşı)
     $name = htmlspecialchars($_POST['name'] ?? '');
     $email = htmlspecialchars($_POST['email'] ?? '');
+    $subject = htmlspecialchars($_POST['subject'] ?? ''); // Konu alanı eklendi
     $message = htmlspecialchars($_POST['message'] ?? '');
 
     // Zorunlu alanların doldurulup doldurulmadığını kontrol ediyoruz
-    if (!empty($name) && !empty($email) && !empty($message)) {
+    if (!empty($name) && !empty($email) && !empty($subject) && !empty($message)) { // Konu alanı da kontrol edildi
         // Gerçek bir uygulamada burada e-posta gönderme (örn: mail() fonksiyonu ile) veya
         // veritabanına kaydetme işlemleri yapılır.
         // Şimdilik sadece bir başarı mesajı gösteriyoruz.
+
+        // Örnek: Form verilerini bir log dosyasına kaydetme
+        $log_file = 'form_submissions.log';
+        $submission_data = date('Y-m-d H:i:s') . " - Name: $name, Email: $email, Subject: $subject, Message: $message\n";
+        file_put_contents($log_file, $submission_data, FILE_APPEND);
+
         $form_status_message = '<div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
                                     <strong class="font-bold">Başarılı!</strong>
                                     <span class="block sm:inline">Mesajınız başarıyla gönderildi. Teşekkür ederiz!</span>
@@ -37,14 +49,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZeroSoft Web Sitesi</title>
-    <!-- Tailwind CSS CDN (İnternet bağlantısı gerektirir) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts - 'Inter' fontunu kullanıyoruz, ZeroSoft sitesine benzer modern bir görünüm için -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         /* Genel stil ayarları */
@@ -113,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
             cursor: pointer;
             border: 1px solid rgba(226, 232, 240, 0.6); /* Hafif kenarlık */
         }
-        
+
         .btn-primary {
             background-color: #667eea; /* Mor buton */
             color: white;
@@ -236,14 +245,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
 </head>
 <body class="flex flex-col min-h-screen">
 
-    <!-- Header (Site Navigasyon Çubuğu) -->
     <header class="bg-white shadow-lg py-4 sticky top-0 z-50">
         <div class="container flex justify-between items-center">
-            <!-- Logo veya Site Adı -->
             <a href="index.php?page=home" class="reveal-item reveal-item-1">
                 <img src="assets/images/logo.jpg" alt="ZeroSoft Logo" class="h-16 w-auto">
             </a>
-            <!-- Navigasyon Menüsü -->
             <nav class="flex items-center space-x-8">
                 <ul class="flex space-x-8">
                     <li><a href="index.php?page=home" class="text-gray-700 hover:text-indigo-600 font-medium transition duration-300 px-3 py-2 rounded-md reveal-item reveal-item-2">Ana Sayfa</a></li>
@@ -252,10 +258,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
                     <li><a href="index.php?page=about" class="text-gray-700 hover:text-indigo-600 font-medium transition duration-300 px-3 py-2 rounded-md reveal-item reveal-item-5">Hakkımızda</a></li>
                     <li><a href="index.php?page=blog" class="text-gray-700 hover:text-indigo-600 font-medium transition duration-300 px-3 py-2 rounded-md reveal-item reveal-item-6">Blog</a></li>
                     <li><a href="index.php?page=faq" class="text-gray-700 hover:text-indigo-600 font-medium transition duration-300 px-3 py-2 rounded-md reveal-item reveal-item-7">SSS</a></li>
-                    <!-- Kariyer linki kaldırıldı -->
                     <li><a href="index.php?page=contact" class="text-gray-700 hover:text-indigo-600 font-medium transition duration-300 px-3 py-2 rounded-md reveal-item reveal-item-9">İletişim</a></li>
                 </ul>
-                <!-- Arama Çubuğu ve Dil Seçeneği -->
                 <div class="flex items-center space-x-4 ml-8 reveal-item reveal-item-10">
                     <div class="relative">
                         <input type="text" placeholder="Ara..." class="pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-700">
@@ -264,20 +268,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
         </div>
     </header>
 
-    <!-- Ana İçerik Alanı -->
     <main class="flex-grow">
         <?php
         // PHP ile hangi sayfanın gösterileceğine karar veriyoruz
         if ($page === 'home') {
+            $stmt = $conn->prepare("SELECT title, content FROM pages WHERE page_name = 'home'");
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $home_content = $result->fetch_assoc();
+            $stmt->close();
+
+            $stmt = $conn->prepare("SELECT title, description, icon_name, bg_color FROM services LIMIT 3"); // İlk 3 hizmeti çek
+            $stmt->execute();
+            $services_home = $stmt->get_result();
+            $stmt->close();
+
+            $stmt = $conn->prepare("SELECT slug, title, summary, image_url, publish_date FROM blog_posts ORDER BY publish_date DESC LIMIT 3");
+            $stmt->execute();
+            $recent_blog_posts = $stmt->get_result();
+            $stmt->close();
         ?>
-            <!-- Ana Sayfa İçeriği -->
             <section class="hero-section rounded-b-3xl shadow-xl">
                 <div class="container">
                     <h1 class="text-5xl md:text-6xl font-extrabold mb-6 leading-tight reveal-item reveal-item-1">
-                        Dijital Geleceğinizi Şekillendirin
+                        <?php echo $home_content['title']; ?>
                     </h1>
                     <p class="text-xl md:text-2xl mb-10 opacity-90 max-w-3xl mx-auto reveal-item reveal-item-2">
-                        Web mobil tüm çözümleriniz için zerosoft.
+                        <?php echo $home_content['content']; ?>
                     </p>
                     <a href="index.php?page=services" class="btn-primary inline-block text-lg shadow-lg hover:shadow-xl transform hover:scale-105 duration-300 reveal-item reveal-item-3">
                         Hizmetlerimizi Keşfedin
@@ -288,43 +305,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
             <section class="py-20 bg-gray-50">
                 <div class="container text-center">
                     <h2 class="section-title reveal-item reveal-item-1">Neden ZeroSoft?</h2>
-                    
+
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 reveal-item reveal-item-2">
-                        <!-- Kart 1: Uzmanlık ve Deneyim -->
+                        <?php while ($service = $services_home->fetch_assoc()): ?>
                         <div class="bg-purple-50 rounded-xl p-8 shadow-md hover:shadow-lg hover:-translate-y-3 transition duration-300 group">
-                            <div class="flex items-center justify-center w-20 h-20 rounded-full bg-indigo-500 text-white mx-auto mb-6 transition duration-300 group-hover:scale-110">
+                            <div class="flex items-center justify-center w-20 h-20 rounded-full bg-<?php echo $service['bg_color']; ?> text-white mx-auto mb-6 transition duration-300 group-hover:scale-110">
                                 <script>
-                                    document.write('<i data-lucide="award" class="w-10 h-10"></i>');
+                                    document.write('<i data-lucide="<?php echo $service['icon_name']; ?>" class="w-10 h-10"></i>');
                                 </script>
                             </div>
-                            <h3 class="text-2xl font-bold mb-4 text-gray-800 text-center">Uzmanlık ve Deneyim</h3>
-                            <p class="text-gray-700 text-center">Yılların verdiği tecrübe ve sektördeki en iyi uzmanlarla projelerinizi hayata geçiriyoruz.</p>
+                            <h3 class="text-2xl font-bold mb-4 text-gray-800 text-center"><?php echo $service['title']; ?></h3>
+                            <p class="text-gray-700 text-center"><?php echo $service['description']; ?></p>
                         </div>
-                        <!-- Kart 2: İnovasyon ve Teknoloji -->
-                        <div class="bg-purple-50 rounded-xl p-8 shadow-md hover:shadow-lg hover:-translate-y-3 transition duration-300 group">
-                            <div class="flex items-center justify-center w-20 h-20 rounded-full bg-green-500 text-white mx-auto mb-6 transition duration-300 group-hover:scale-110">
-                                <script>
-                                    document.write('<i data-lucide="lightbulb" class="w-10 h-10"></i>');
-                                </script>
-                            </div>
-                            <h3 class="text-2xl font-bold mb-4 text-gray-800 text-center">İnovasyon ve Teknoloji</h3>
-                            <p class="text-gray-700 text-center">En yeni teknolojileri ve yenilikçi yaklaşımları kullanarak çözümler üretiyoruz.</p>
-                        </div>
-                        <!-- Kart 3: Müşteri Odaklı Yaklaşım -->
-                        <div class="bg-purple-50 rounded-xl p-8 shadow-md hover:shadow-lg hover:-translate-y-3 transition duration-300 group">
-                            <div class="flex items-center justify-center w-20 h-20 rounded-full bg-red-500 text-white mx-auto mb-6 transition duration-300 group-hover:scale-110">
-                                <script>
-                                    document.write('<i data-lucide="heart" class="w-10 h-10"></i>');
-                                </script>
-                            </div>
-                            <h3 class="text-2xl font-bold mb-4 text-gray-800 text-center">Müşteri Odaklı Yaklaşım</h3>
-                            <p class="text-gray-700 text-center">Müşteri memnuniyetini en üst düzeyde tutarak, projelerimizi sizin ihtiyaçlarınıza göre şekillendiriyoruz.</p>
-                        </div>
+                        <?php endwhile; ?>
                     </div>
                 </div>
             </section>
 
-            <!-- Yeni Blog Yazıları Bölümü -->
             <section class="py-20 bg-white">
                 <div class="container text-center">
                     <h2 class="section-title reveal-item reveal-item-1">Son Blog Yazılarımız</h2>
@@ -332,30 +329,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
                         Teknoloji ve yazılım dünyasındaki en güncel gelişmeleri takip edin.
                     </p>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <!-- Blog Yazısı Kartı 1 -->
+                        <?php while ($post = $recent_blog_posts->fetch_assoc()): ?>
                         <div class="bg-purple-50 rounded-xl p-6 shadow-md hover:shadow-lg hover:-translate-y-2 transition duration-300 group reveal-item reveal-item-3">
-                            <img src="assets/images/yapay_zeka.jpg" alt="Yapay Zeka ve Geleceğin Yazılımı" class="rounded-lg mb-6 w-full h-40 object-cover">
-                            <h3 class="text-xl font-bold mb-2 text-gray-800 text-left">Yapay Zeka ve Geleceğin Yazılımı</h3>
-                            <p class="text-gray-600 text-left text-sm mb-4">Yapay zekanın yazılım dünyasını nasıl dönüştürdüğünü ve gelecekte bizi nelerin beklediğini keşfedin.</p>
-                            <a href="index.php?page=blog_ai" class="text-indigo-600 hover:underline font-medium text-left block">Devamını Oku <i class="fas fa-arrow-right text-xs ml-1"></i></a>
-                            <p class="text-gray-500 text-xs mt-2 text-left">10 Temmuz 2024</p>
+                            <img src="<?php echo $post['image_url']; ?>" alt="<?php echo $post['title']; ?>" class="rounded-lg mb-6 w-full h-40 object-cover">
+                            <h3 class="text-xl font-bold mb-2 text-gray-800 text-left"><?php echo $post['title']; ?></h3>
+                            <p class="text-gray-600 text-left text-sm mb-4"><?php echo $post['summary']; ?></p>
+                            <a href="index.php?page=blog_detail&slug=<?php echo $post['slug']; ?>" class="text-indigo-600 hover:underline font-medium text-left block">Devamını Oku <i class="fas fa-arrow-right text-xs ml-1"></i></a>
+                            <p class="text-gray-500 text-xs mt-2 text-left"><?php echo date('d F Y', strtotime($post['publish_date'])); ?></p>
                         </div>
-                        <!-- Blog Yazısı Kartı 2 -->
-                        <div class="bg-purple-50 rounded-xl p-6 shadow-md hover:shadow-lg hover:-translate-y-2 transition duration-300 group reveal-item reveal-item-4">
-                            <img src="assets/images/cloud-teknolojisi.jpg" alt="Bulut Bilişimin İşletmelere Faydaları" class="rounded-lg mb-6 w-full h-40 object-cover">
-                            <h3 class="text-xl font-bold mb-2 text-gray-800 text-left">Bulut Bilişimin İşletmelere Faydaları</h3>
-                            <p class="text-gray-600 text-left text-sm mb-4">Bulut teknolojilerinin işletmeler için sunduğu avantajları ve nasıl adapte olabileceğinizi öğrenin.</p>
-                            <a href="index.php?page=blog_cloud" class="text-indigo-600 hover:underline font-medium text-left block">Devamını Oku <i class="fas fa-arrow-right text-xs ml-1"></i></a>
-                            <p class="text-gray-500 text-xs mt-2 text-left">05 Temmuz 2024</p>
-                        </div>
-                        <!-- Blog Yazısı Kartı 3 -->
-                        <div class="bg-purple-50 rounded-xl p-6 shadow-md hover:shadow-lg hover:-translate-y-2 transition duration-300 group reveal-item reveal-item-5">
-                            <img src="assets/images/mobil.png" alt="Mobil Uygulama Geliştirmede UX Önemi" class="rounded-lg mb-6 w-full h-40 object-cover">
-                            <h3 class="text-xl font-bold mb-2 text-gray-800 text-left">Mobil Uygulama Geliştirmede UX Önemi</h3>
-                            <p class="text-gray-600 text-left text-sm mb-4">Kullanıcı deneyiminin mobil uygulama başarısındaki kritik rolünü ve en iyi uygulamaları inceleyin.</p>
-                            <a href="index.php?page=blog_ux" class="text-indigo-600 hover:underline font-medium text-left block">Devamını Oku <i class="fas fa-arrow-right text-xs ml-1"></i></a>
-                            <p class="text-gray-500 text-xs mt-2 text-left">01 Temmuz 2024</p>
-                        </div>
+                        <?php endwhile; ?>
                     </div>
                     <a href="index.php?page=blog" class="btn-primary inline-block text-lg shadow-lg hover:shadow-xl transform hover:scale-105 duration-300 mt-12 reveal-item reveal-item-6">
                         Tüm Blog Yazılarını Görüntüle
@@ -365,78 +347,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
 
         <?php
         } elseif ($page === 'services') {
+            $stmt = $conn->prepare("SELECT title, description, icon_name, bg_color FROM services");
+            $stmt->execute();
+            $services = $stmt->get_result();
+            $stmt->close();
         ?>
-            <!-- Hizmetler Sayfası İçeriği -->
             <section class="py-20 bg-gray-50">
                 <div class="container mx-auto px-4">
                     <h2 class="section-title reveal-item text-center items-center reveal-item-1">Sunulan Hizmetlerimiz</h2>
-                    
+
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-10 reveal-item reveal-item-2">
-                        <!-- Hizmet Kartı 1: Web Geliştirme -->
+                        <?php while ($service = $services->fetch_assoc()): ?>
                         <div class="bg-purple-50 rounded-xl p-8 shadow-md hover:shadow-lg hover:brightness-105 transition duration-300 group flex flex-col items-center text-center">
-                            <div class="flex items-center justify-center w-16 h-16 rounded-full bg-blue-600 text-white mx-auto mb-6 transition duration-300 group-hover:scale-110">
+                            <div class="flex items-center justify-center w-16 h-16 rounded-full bg-<?php echo $service['bg_color']; ?> text-white mx-auto mb-6 transition duration-300 group-hover:scale-110">
                                 <script>
-                                    document.write('<i data-lucide="monitor" class="w-8 h-8"></i>');
+                                    document.write('<i data-lucide="<?php echo $service['icon_name']; ?>" class="w-8 h-8"></i>');
                                 </script>
                             </div>
-                            <h3 class="text-2xl font-bold mb-4 text-gray-800 font-inter">Web Geliştirme</h3>
-                            <p class="text-gray-700 mb-4 font-inter">Modern, duyarlı ve performans odaklı web siteleri ve web tabanlı uygulamalar tasarlıyor ve geliştiriyoruz.</p>
+                            <h3 class="text-2xl font-bold mb-4 text-gray-800 font-inter"><?php echo $service['title']; ?></h3>
+                            <p class="text-gray-700 mb-4 font-inter"><?php echo $service['description']; ?></p>
                             <ul class="list-disc list-inside text-gray-700 space-y-2 text-left w-full font-inter">
                                 <li>Responsive Tasarım</li>
                                 <li>SEO Optimizasyonu</li>
                                 <li>Hızlı performans</li>
                             </ul>
                         </div>
-                        <!-- Hizmet Kartı 2: Mobil Uygulama Geliştirme -->
-                        <div class="bg-purple-50 rounded-xl p-8 shadow-md hover:shadow-lg hover:brightness-105 transition duration-300 group flex flex-col items-center text-center">
-                            <div class="flex items-center justify-center w-16 h-16 rounded-full bg-green-600 text-white mx-auto mb-6 transition duration-300 group-hover:scale-110">
-                                <script>
-                                    document.write('<i data-lucide="app-window" class="w-8 h-8"></i>');
-                                </script>
-                            </div>
-                            <h3 class="text-2xl font-bold mb-4 text-gray-800 font-inter">Mobil Uygulama Geliştirme</h3>
-                            <p class="text-gray-700 mb-4 font-inter">iOS ve Android platformları için kullanıcı dostu ve yenilikçi mobil uygulamalar geliştiriyoruz.</p>
-                            <ul class="list-disc list-inside text-gray-700 space-y-2 text-left w-full font-inter">
-                                <li>Native Mobil Uygulamalar</li>
-                                <li>Cross-Platform Uygulamalar</li>
-                                <li>App Store Optimizasyonu</li>
-                            </ul>
-                        </div>
-                        <!-- Hizmet Kartı 3: Bulut Çözümleri -->
-                        <div class="bg-purple-50 rounded-xl p-8 shadow-md hover:shadow-lg hover:brightness-105 transition duration-300 group flex flex-col items-center text-center">
-                            <div class="flex items-center justify-center w-16 h-16 rounded-full bg-purple-600 text-white mx-auto mb-6 transition duration-300 group-hover:scale-110">
-                                <script>
-                                    document.write('<i data-lucide="server" class="w-8 h-8"></i>');
-                                </script>
-                            </div>
-                            <h3 class="text-2xl font-bold mb-4 text-gray-800 font-inter">Bulut Çözümleri</h3>
-                            <p class="text-gray-700 mb-4 font-inter">AWS, Azure ve Google Cloud üzerinde güvenli ve ölçeklenebilir bulut çözümleri sunuyoruz.</p>
-                            <ul class="list-disc list-inside text-gray-700 space-y-2 text-left w-full font-inter">
-                                <li>Cloud Migration</li>
-                                <li>DevOps Hizmetleri</li>
-                                <li>7/24 Monitoring</li>
-                            </ul>
-                        </div>
-                        <!-- Hizmet Kartı 4: Danışmanlık ve Destek -->
-                        <div class="bg-purple-50 rounded-xl p-8 shadow-md hover:shadow-lg hover:brightness-105 transition duration-300 group flex flex-col items-center text-center">
-                            <div class="flex items-center justify-center w-16 h-16 rounded-full bg-red-600 text-white mx-auto mb-6 transition duration-300 group-hover:scale-110">
-                                <script>
-                                    document.write('<i data-lucide="handshake" class="w-8 h-8"></i>');
-                                </script>
-                            </div>
-                            <h3 class="text-2xl font-bold mb-4 text-gray-800 font-inter">Danışmanlık ve Destek</h3>
-                            <p class="text-gray-700 mb-4 font-inter">Dijital dönüşüm süreçlerinizde uzman ekibimizle yanınızdayız.</p>
-                            <ul class="list-disc list-inside text-gray-700 space-y-2 text-left w-full font-inter">
-                                <li>Dijital Strateji</li>
-                                <li>Proje Yönetimi</li>
-                                <li>Teknoloji Danışmanlığı</li>
-                            </ul>
-                        </div>
+                        <?php endwhile; ?>
                     </div>
                 </div>
             </section>
 
-            <!-- Sürecimiz Bölümü -->
             <section class="py-20 bg-white">
                 <div class="container mx-auto px-4 text-center">
                     <h2 class="section-title reveal-item reveal-item-1">Sürecimiz</h2>
@@ -444,7 +384,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
                         Projelerinizi hayata geçirirken izlediğimiz adımlar.
                     </p>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 reveal-item reveal-item-3">
-                        <!-- Süreç Kartı 1: Keşif ve Analiz -->
                         <div class="bg-purple-50 rounded-xl p-8 shadow-sm hover:shadow-md hover:-translate-y-2 transition duration-300 border-t-4 border-indigo-500 hover:border-t-8 hover:border-indigo-700 group">
                             <div class="flex items-center justify-center w-16 h-16 rounded-full bg-indigo-500 text-white mx-auto mb-6 transition duration-300 group-hover:rotate-6">
                                 <script>
@@ -454,7 +393,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
                             <h3 class="text-xl font-bold mb-2 text-gray-800">Keşif ve Analiz</h3>
                             <p class="text-gray-700">İhtiyaçlarınızı ve hedeflerinizi detaylı bir şekilde anlayarak projenizin temelini atıyoruz.</p>
                         </div>
-                        <!-- Süreç Kartı 2: Tasarım ve Planlama -->
                         <div class="bg-purple-50 rounded-xl p-8 shadow-sm hover:shadow-md hover:-translate-y-2 transition duration-300 border-t-4 border-purple-500 hover:border-t-8 hover:border-purple-700 group">
                             <div class="flex items-center justify-center w-16 h-16 rounded-full bg-purple-500 text-white mx-auto mb-6 transition duration-300 group-hover:rotate-6">
                                 <script>
@@ -464,7 +402,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
                             <h3 class="text-xl font-bold mb-2 text-gray-800">Tasarım ve Planlama</h3>
                             <p class="text-gray-700">Kullanıcı deneyimini ön planda tutarak estetik ve işlevsel tasarımlar oluşturuyoruz.</p>
                         </div>
-                        <!-- Süreç Kartı 3: Geliştirme ve Uygulama -->
                         <div class="bg-purple-50 rounded-xl p-8 shadow-sm hover:shadow-md hover:-translate-y-2 transition duration-300 border-t-4 border-green-500 hover:border-t-8 hover:border-green-700 group">
                             <div class="flex items-center justify-center w-16 h-16 rounded-full bg-green-500 text-white mx-auto mb-6 transition duration-300 group-hover:rotate-6">
                                 <script>
@@ -474,7 +411,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
                             <h3 class="text-xl font-bold mb-2 text-gray-800">Geliştirme ve Uygulama</h3>
                             <p class="text-gray-700">En son teknolojileri kullanarak projenizi titizlikle geliştiriyor ve hayata geçiriyoruz.</p>
                         </div>
-                        <!-- Süreç Kartı 4: Test ve Destek -->
                         <div class="bg-purple-50 rounded-xl p-8 shadow-sm hover:shadow-md hover:-translate-y-2 transition duration-300 border-t-4 border-red-500 hover:border-t-8 hover:border-red-700 group">
                             <div class="flex items-center justify-center w-16 h-16 rounded-full bg-red-500 text-white mx-auto mb-6 transition duration-300 group-hover:rotate-6">
                                 <script>
@@ -488,7 +424,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
                 </div>
             </section>
 
-            <!-- Bülten Aboneliği Bölümü - Kart Tasarımı -->
             <section class="py-20 bg-gray-100">
                 <div class="container mx-auto px-4 text-center">
                     <h2 class="section-title reveal-item reveal-item-1">Bültenimize Abone Olun</h2>
@@ -513,8 +448,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
 
         <?php
         } elseif ($page === 'portfolio') { // Demolar sayfası Portföy olarak güncellendi
+            $stmt = $conn->prepare("SELECT title, description, image_url FROM portfolio_items");
+            $stmt->execute();
+            $portfolio_items = $stmt->get_result();
+            $stmt->close();
         ?>
-            <!-- Portföy Sayfası İçeriği -->
             <section class="py-20 bg-gray-50">
                 <div class="container text-center">
                     <h2 class="section-title reveal-item reveal-item-1">Portföyümüz</h2>
@@ -522,69 +460,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
                         Tamamladığımız projelerden bazı örnekleri inceleyebilirsiniz.
                     </p>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <!-- Demo Kart 1 -->
+                        <?php while ($item = $portfolio_items->fetch_assoc()): ?>
                         <div class="relative rounded-xl shadow-md overflow-hidden group">
-                            <img src="assets/images/eticaret.jpg" alt="Web Demo 1 Website" class="w-full h-48 object-cover rounded-t-xl">
+                            <img src="<?php echo $item['image_url']; ?>" alt="<?php echo $item['title']; ?>" class="w-full h-48 object-cover rounded-t-xl">
                             <div class="absolute inset-0 bg-purple-700/70 rounded-t-xl flex items-center justify-center opacity-100 group-hover:opacity-0 transition duration-300">
-                                <h3 class="text-3xl font-bold text-white">E-Ticaret Sitesi</h3>
+                                <h3 class="text-3xl font-bold text-white"><?php echo $item['title']; ?></h3>
                             </div>
                             <div class="p-6 bg-purple-50 rounded-b-xl text-left">
-                                
-                                <p class="text-gray-700 mb-4">Modern ve kullanıcı dostu bir e-ticaret platformu demosu.</p>
-                                <a href="#" class="btn-primary inline-block text-sm">Detayları İncele</a>
-                            </div>
-                        </div>
-                        <!-- Demo Kart 2 -->
-                        <div class="relative rounded-xl shadow-md overflow-hidden group">
-                            <img src="assets/images/profesyonel-mobil-uygulama.jpg" alt="Mobil Uygulama Demo 1" class="w-full h-48 object-cover rounded-t-xl">
-                            <div class="absolute inset-0 bg-purple-700/70 rounded-t-xl flex items-center justify-center opacity-100 group-hover:opacity-0 transition duration-300">
-                                <h3 class="text-3xl font-bold text-white">Mobil CRM Uygulaması</h3>
-                            </div>
-                            <div class="p-6 bg-purple-50 rounded-b-xl text-left">
-                                
-                                <p class="text-gray-700 mb-4">Müşteri ilişkileri yönetimi için mobil uygulama demosu.</p>
-                                <a href="#" class="btn-primary inline-block text-sm">Detayları İncele</a>
-                            </div>
-                        </div>
-                        <!-- Demo Kart 3 -->
-                        <div class="relative rounded-xl shadow-md overflow-hidden group">
-                            <img src="assets/images/SAAS.jpg" alt="SaaS Demo 1" class="w-full h-48 object-cover rounded-t-xl">
-                            <div class="absolute inset-0 bg-purple-700/70 rounded-t-xl flex items-center justify-center opacity-100 group-hover:opacity-0 transition duration-300">
-                                <h3 class="text-3xl font-bold text-white">SaaS Yönetim Paneli</h3>
-                            </div>
-                            <div class="p-6 bg-purple-50 rounded-b-xl text-left">
-                                
-                                <p class="text-gray-700 mb-4">Kapsamlı bir SaaS ürününün yönetim paneli demosu.</p>
-                                <a href="#" class="btn-primary inline-block text-sm">Detayları İncele</a>
-                            </div>
-                        </div>
-                        <!-- Demo Kart 4 -->
-                        <div class="relative rounded-xl shadow-md overflow-hidden group">
-                            <img src="assets/images/kurumsal-web-sitesi-2.jpg" alt="Web Demo 2" class="w-full h-48 object-cover rounded-t-xl">
-                            <div class="absolute inset-0 bg-purple-700/70 rounded-t-xl flex items-center justify-center opacity-100 group-hover:opacity-0 transition duration-300">
-                                <h3 class="text-3xl font-bold text-white">Kurumsal Web Sitesi</h3>
-                            </div>
-                            <div class="p-6 bg-purple-50 rounded-b-xl text-left">
-                                
-                                <p class="text-gray-700 mb-4">Modern ve profesyonel kurumsal web sitesi demosu.</p>
-                                <a href="#" class="btn-primary inline-block text-sm">Detayları İncele</a>
-                            </div>
-                        </div>
-                        
 
-                    <!-- Müşteri Yorumları / Referanslar Bölümü kaldırıldı -->
+                                <p class="text-gray-700 mb-4"><?php echo $item['description']; ?></p>
+                                <a href="#" class="btn-primary inline-block text-sm">Detayları İncele</a>
+                            </div>
+                        </div>
+                        <?php endwhile; ?>
+                    </div>
                 </div>
             </section>
 
         <?php
         } elseif ($page === 'about') {
+            $stmt = $conn->prepare("SELECT title, content FROM pages WHERE page_name = 'about'");
+            $stmt->execute();
+            $about_content = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
         ?>
-            <!-- Hakkımızda Sayfası İçeriği -->
             <section class="py-20 bg-white">
                 <div class="container text-center">
-                    <h2 class="section-title reveal-item reveal-item-1">Biz Kimiz?</h2>
+                    <h2 class="section-title reveal-item reveal-item-1"><?php echo $about_content['title']; ?></h2>
                     <p class="text-lg leading-relaxed text-gray-700 mb-8 max-w-4xl mx-auto reveal-item reveal-item-2">
-                        ZeroSoft olarak, teknolojinin sunduğu sınırsız imkanlarla onların potansiyellerini açığa çıkarmalarına yardımcı oluyoruz.
+                        <?php echo nl2br($about_content['content']); ?>
                     </p>
                     <p class="text-lg leading-relaxed text-gray-700 max-w-4xl mx-auto reveal-item reveal-item-3">
                         Her projede, müşterilerimizin hedeflerini kendi hedeflerimiz gibi benimseyerek, şeffaf iletişim ve mükemmeliyetçilik ilkesiyle hareket ediyoruz. Deneyimli kadromuz ve dinamik ekibimizle, global standartlarda çözümler üretiyor ve teknolojinin geleceğini şekillendiriyoruz.
@@ -596,7 +500,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
                 <div class="container text-center">
                     <h3 class="text-3xl font-bold text-gray-800 mb-10 reveal-item reveal-item-1">Misyonumuz & Vizyonumuz & Değerlerimiz</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 reveal-item reveal-item-2">
-                        <!-- Hakkımızda Kart 1: Misyonumuz -->
                         <div class="bg-purple-50 rounded-xl p-8 shadow-md hover:shadow-lg hover:-translate-y-3 transition duration-300 group">
                             <div class="flex items-center justify-center w-20 h-20 rounded-full bg-indigo-600 text-white mx-auto mb-6 transition duration-300 group-hover:scale-110">
                                 <script>
@@ -606,7 +509,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
                             <h4 class="text-2xl font-bold mb-4 text-gray-800">Misyonumuz</h4>
                             <p class="text-gray-700">Müşterilerimize özel ve yenilikçi teknoloji çözümleri sunarak, işlerini dijital dünyada büyütmelerine yardımcı olmak ve sürdürülebilir başarı elde etmelerini sağlamak.</p>
                         </div>
-                        <!-- Hakkımızda Kart 2: Vizyonumuz -->
                         <div class="bg-purple-50 rounded-xl p-8 shadow-md hover:shadow-lg hover:-translate-y-3 transition duration-300 group">
                             <div class="flex items-center justify-center w-20 h-20 rounded-full bg-purple-600 text-white mx-auto mb-6 transition duration-300 group-hover:scale-110">
                                 <script>
@@ -616,7 +518,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
                             <h4 class="text-2xl font-bold mb-4 text-gray-800">Vizyonumuz</h4>
                             <p class="text-gray-700">Dijital dünyada öncü çözümler üreterek, işletmelerin teknolojik dönüşümüne liderlik etmek ve müşterilerimizin başarı hikayelerinin bir parçası olmak.</p>
                         </div>
-                        <!-- Hakkımızda Kart 3: Değerlerimiz -->
                         <div class="bg-purple-50 rounded-xl p-8 shadow-md hover:shadow-lg hover:-translate-y-3 transition duration-300 group">
                             <div class="flex items-center justify-center w-20 h-20 rounded-full bg-yellow-600 text-white mx-auto mb-6 transition duration-300 group-hover:scale-110">
                                 <script>
@@ -626,15 +527,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
                             <h4 class="text-2xl font-bold mb-4 text-gray-800">Değerlerimiz</h4>
                             <p class="text-gray-700">Müşterilerimizle uzun vadeli ve güçlü ortaklıklar kurarak, onların başarısını kendi başarımız olarak görüyor ve bu doğrultuda çalışıyoruz.</p>
                         </div>
-                        
+
                     </div>
                 </div>
             </section>
 
         <?php
         } elseif ($page === 'blog') {
+            $stmt = $conn->prepare("SELECT slug, title, summary, image_url, publish_date FROM blog_posts ORDER BY publish_date DESC");
+            $stmt->execute();
+            $blog_posts = $stmt->get_result();
+            $stmt->close();
         ?>
-            <!-- Blog Sayfası İçeriği -->
             <section class="py-20 bg-gray-50">
                 <div class="container text-center">
                     <h2 class="section-title reveal-item reveal-item-1">Blogumuzdan Son Yazılar</h2>
@@ -642,38 +546,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
                         Teknoloji, yazılım geliştirme ve sektördeki yenilikler hakkında en güncel içerikler.
                     </p>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <!-- Blog Yazısı 1 -->
+                        <?php while ($post = $blog_posts->fetch_assoc()): ?>
                         <div class="bg-purple-50 rounded-xl p-6 shadow-md hover:shadow-lg hover:-translate-y-2 transition duration-300 group reveal-item reveal-item-3">
-                            <img src="assets/images/yapay_zeka.jpg" alt="Yapay Zeka ve Geleceğin Yazılımı" class="rounded-lg mb-6 w-full h-40 object-cover">
-                            <h3 class="text-xl font-bold mb-2 text-gray-800 text-left">Yapay Zeka ve Geleceğin Yazılımı</h3>
-                            <p class="text-gray-600 text-left text-sm mb-4">Yapay zekanın yazılım dünyasını nasıl dönüştürdüğünü ve gelecekte bizi nelerin beklediğini keşfedin.</p>
-                            <a href="index.php?page=blog_ai" class="text-indigo-600 hover:underline font-medium text-left block">Devamını Oku <i class="fas fa-arrow-right text-xs ml-1"></i></a>
-                            <p class="text-gray-500 text-xs mt-2 text-left">10 Temmuz 2024</p>
+                            <img src="<?php echo $post['image_url']; ?>" alt="<?php echo $post['title']; ?>" class="rounded-lg mb-6 w-full h-40 object-cover">
+                            <h3 class="text-xl font-bold mb-2 text-gray-800 text-left"><?php echo $post['title']; ?></h3>
+                            <p class="text-gray-600 text-left text-sm mb-4"><?php echo $post['summary']; ?></p>
+                            <a href="index.php?page=blog_detail&slug=<?php echo $post['slug']; ?>" class="text-indigo-600 hover:underline font-medium text-left block">Devamını Oku <i class="fas fa-arrow-right text-xs ml-1"></i></a>
+                            <p class="text-gray-500 text-xs mt-2 text-left"><?php echo date('d F Y', strtotime($post['publish_date'])); ?></p>
                         </div>
-                        <!-- Blog Yazısı 2 -->
-                        <div class="bg-purple-50 rounded-xl p-6 shadow-md hover:shadow-lg hover:-translate-y-2 transition duration-300 group reveal-item reveal-item-4">
-                            <img src="assets/images/cloud-teknolojisi.jpg" alt="Bulut Bilişimin İşletmelere Faydaları" class="rounded-lg mb-6 w-full h-40 object-cover">
-                            <h3 class="text-xl font-bold mb-2 text-gray-800 text-left">Bulut Bilişimin İşletmelere Faydaları</h3>
-                            <p class="text-gray-600 text-left text-sm mb-4">Bulut teknolojilerinin işletmeler için sunduğu avantajları ve nasıl adapte olabileceğinizi öğrenin.</p>
-                            <a href="index.php?page=blog_cloud" class="text-indigo-600 hover:underline font-medium text-left block">Devamını Oku <i class="fas fa-arrow-right text-xs ml-1"></i></a>
-                            <p class="text-gray-500 text-xs mt-2 text-left">05 Temmuz 2024</p>
-                        </div>
-                        <!-- Blog Yazısı 3 -->
-                        <div class="bg-purple-50 rounded-xl p-6 shadow-md hover:shadow-lg hover:-translate-y-2 transition duration-300 group reveal-item reveal-item-5">
-                            <img src="assets/images/mobil.png" alt="Mobil Uygulama Geliştirmede UX Önemi" class="rounded-lg mb-6 w-full h-40 object-cover">
-                            <h3 class="text-xl font-bold mb-2 text-gray-800 text-left">Mobil Uygulama Geliştirmede UX Önemi</h3>
-                            <p class="text-gray-600 text-left text-sm mb-4">Kullanıcı deneyiminin mobil uygulama başarısındaki kritik rolünü ve en iyi uygulamaları inceleyin.</p>
-                            <a href="index.php?page=blog_ux" class="text-indigo-600 hover:underline font-medium text-left block">Devamını Oku <i class="fas fa-arrow-right text-xs ml-1"></i></a>
-                            <p class="text-gray-500 text-xs mt-2 text-left">01 Temmuz 2024</p>
-                        </div>
+                        <?php endwhile; ?>
                     </div>
                 </div>
             </section>
 
         <?php
-        } elseif ($page === 'faq') {
+        } elseif ($page === 'blog_detail' && !empty($slug)) {
+            $stmt = $conn->prepare("SELECT title, content, image_url, publish_date FROM blog_posts WHERE slug = ?");
+            $stmt->bind_param("s", $slug);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $blog_post_detail = $result->fetch_assoc();
+            $stmt->close();
+
+            if ($blog_post_detail) {
         ?>
-            <!-- SSS Sayfası İçeriği -->
+            <section class="py-20 bg-gray-50">
+                <div class="container mx-auto px-4 max-w-3xl">
+                    <h2 class="section-title text-left reveal-item reveal-item-1"><?php echo $blog_post_detail['title']; ?></h2>
+                    <p class="text-gray-600 text-left text-sm mb-6 reveal-item reveal-item-2"><?php echo date('d F Y', strtotime($blog_post_detail['publish_date'])); ?></p>
+                    <img src="<?php echo $blog_post_detail['image_url']; ?>" alt="<?php echo $blog_post_detail['title']; ?> Detay" class="rounded-lg mb-8 w-full object-cover reveal-item reveal-item-3">
+                    <div class="text-lg leading-relaxed text-gray-700 mb-6 reveal-item reveal-item-4">
+                        <?php echo $blog_post_detail['content']; ?>
+                    </div>
+                    <a href="index.php?page=blog" class="btn-primary inline-block text-base mt-8 reveal-item reveal-item-7">
+                        <i class="fas fa-arrow-left mr-2"></i> Tüm Yazılara Geri Dön
+                    </a>
+                </div>
+            </section>
+        <?php
+            } else {
+                // Blog yazısı bulunamazsa 404 sayfasına yönlendir
+                header("Location: index.php?page=404");
+                exit();
+            }
+        }
+        elseif ($page === 'faq') {
+            $stmt = $conn->prepare("SELECT question, answer FROM faqs");
+            $stmt->execute();
+            $faqs = $stmt->get_result();
+            $stmt->close();
+        ?>
             <section class="py-20 bg-gray-50">
                 <div class="container">
                     <h2 class="section-title text-center reveal-item reveal-item-1">Sıkça Sorulan Sorular</h2>
@@ -681,46 +603,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
                         Aklınızdaki sorulara hızlı yanıtlar bulabilirsiniz.
                     </p>
                     <div class="max-w-3xl mx-auto bg-purple-50 rounded-xl shadow-lg p-8 reveal-item reveal-item-3">
-                        <!-- SSS Öğesi 1 -->
+                        <?php while ($faq = $faqs->fetch_assoc()): ?>
                         <div class="faq-item">
                             <div class="faq-question" onclick="toggleFAQ(this)">
-                                <span>ZeroSoft hangi hizmetleri sunuyor?</span>
+                                <span><?php echo $faq['question']; ?></span>
                                 <i class="fas fa-chevron-down faq-icon"></i>
                             </div>
                             <div class="faq-answer">
-                                <p>ZeroSoft olarak web geliştirme, mobil uygulama geliştirme, bulut çözümleri ve teknoloji danışmanlığı gibi geniş bir yelpazede hizmetler sunmaktayız.</p>
+                                <p><?php echo $faq['answer']; ?></p>
                             </div>
                         </div>
-                        <!-- SSS Öğesi 2 -->
-                        <div class="faq-item">
-                            <div class="faq-question" onclick="toggleFAQ(this)">
-                                <span>Projelerinizde hangi teknolojileri kullanıyorsunuz?</span>
-                                <i class="fas fa-chevron-down faq-icon"></i>
-                            </div>
-                            <div class="faq-answer">
-                                <p>Projelerimizde güncel ve sektör lideri teknolojileri tercih ediyoruz. Bunlar arasında React, Vue.js, Node.js, Python, PHP, Laravel, Flutter, React Native, AWS, Azure ve Google Cloud gibi teknolojiler bulunmaktadır.</p>
-                            </div>
-                        </div>
-                        <!-- SSS Öğesi 3 -->
-                        <div class="faq-item">
-                            <div class="faq-question" onclick="toggleFAQ(this)">
-                                <span>Proje süreci nasıl işliyor?</span>
-                                <i class="fas fa-chevron-down faq-icon"></i>
-                            </div>
-                            <div class="faq-answer">
-                                <p>Proje sürecimiz keşif ve analiz, tasarım ve planlama, geliştirme ve uygulama, test ve destek olmak üzere dört ana adımdan oluşmaktadır. Her aşamada şeffaf iletişim ve müşteri odaklı yaklaşım benimsiyoruz.</p>
-                            </div>
-                        </div>
-                        <!-- SSS Öğesi 4 -->
-                        <div class="faq-item">
-                            <div class="faq-question" onclick="toggleFAQ(this)">
-                                <span>Destek hizmetleriniz nelerdir?</span>
-                                <i class="fas fa-chevron-down faq-icon"></i>
-                            </div>
-                            <div class="faq-answer">
-                                <p>Tamamlanan projeler için sürekli teknik destek, bakım ve güncelleme hizmetleri sunuyoruz. Müşterilerimizin sistemlerinin sorunsuz çalışmasını sağlamak için 7/24 izleme ve müdahale kapasitemiz bulunmaktadır.</p>
-                            </div>
-                        </div>
+                        <?php endwhile; ?>
                     </div>
                 </div>
             </section>
@@ -728,7 +621,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
         <?php
         } elseif ($page === 'contact') {
         ?>
-            <!-- İletişim Sayfası İçeriği -->
             <section class="py-20 bg-gray-50">
                 <div class="container">
                     <h2 class="section-title text-center reveal-item reveal-item-1">Bize Ulaşın</h2>
@@ -780,77 +672,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
 
         <?php
         }
-        // Yeni blog yazısı detay sayfaları
-        elseif ($page === 'blog_ai') {
-        ?>
-            <section class="py-20 bg-gray-50">
-                <div class="container mx-auto px-4 max-w-3xl">
-                    <h2 class="section-title text-left reveal-item reveal-item-1">Yapay Zeka ve Geleceğin Yazılımı</h2>
-                    <p class="text-gray-600 text-left text-sm mb-6 reveal-item reveal-item-2">10 Temmuz 2024</p>
-                    <img src="https://placehold.co/800x400/A78BFA/FFFFFF?text=Yapay+Zeka+Detay" alt="Yapay Zeka ve Geleceğin Yazılımı Detay" class="rounded-lg mb-8 w-full object-cover reveal-item reveal-item-3">
-                    <p class="text-lg leading-relaxed text-gray-700 mb-6 reveal-item reveal-item-4">
-                        Yapay zeka (YZ), günümüz yazılım dünyasını kökten değiştiren ve gelecekteki teknolojik gelişmelere yön veren en önemli alanlardan biridir. Makine öğrenimi, derin öğrenme ve doğal dil işleme gibi alt dallarıyla YZ, yazılımların daha akıllı, adaptif ve özerk hale gelmesini sağlamaktadır.
-                    </p>
-                    <p class="text-lg leading-relaxed text-gray-700 mb-6 reveal-item reveal-item-5">
-                        Gelecekte yazılım geliştirme süreçlerinde YZ'nin rolü daha da artacak. Otomatik kod üretimi, hata tespiti ve optimizasyon gibi alanlarda YZ destekli araçlar yaygınlaşacak. Bu da geliştiricilerin daha karmaşık ve yaratıcı problemlere odaklanmasına olanak tanıyacak. YZ ayrıca, kişiselleştirilmiş kullanıcı deneyimleri sunan, veri analiziyle karar alma süreçlerini optimize eden ve otomasyonu artıran uygulamaların temelini oluşturacak.
-                    </p>
-                    <p class="text-lg leading-relaxed text-gray-700 reveal-item reveal-item-6">
-                        ZeroSoft olarak, yapay zeka entegrasyonu konusunda uzmanlaşmış ekibimizle, işletmelerin YZ'nin sunduğu potansiyeli tam olarak kullanmalarına yardımcı oluyoruz. Akıllı otomasyon sistemlerinden veri odaklı karar destek mekanizmalarına kadar çeşitli YZ çözümleri geliştirerek, müşterilerimizin dijital dönüşüm yolculuklarında yanlarında oluyoruz.
-                    </p>
-                    <a href="index.php?page=blog" class="btn-primary inline-block text-base mt-8 reveal-item reveal-item-7">
-                        <i class="fas fa-arrow-left mr-2"></i> Tüm Yazılara Geri Dön
-                    </a>
-                </div>
-            </section>
-        <?php
-        } elseif ($page === 'blog_cloud') {
-        ?>
-            <section class="py-20 bg-gray-50">
-                <div class="container mx-auto px-4 max-w-3xl">
-                    <h2 class="section-title text-left reveal-item reveal-item-1">Bulut Bilişimin İşletmelere Faydaları</h2>
-                    <p class="text-gray-600 text-left text-sm mb-6 reveal-item reveal-item-2">05 Temmuz 2024</p>
-                    <img src="https://placehold.co/800x400/A78BFA/FFFFFF?text=Bulut+Bilisim+Detay" alt="Bulut Bilişimin İşletmelere Faydaları Detay" class="rounded-lg mb-8 w-full object-cover reveal-item reveal-item-3">
-                    <p class="text-lg leading-relaxed text-gray-700 mb-6 reveal-item reveal-item-4">
-                        Bulut bilişim, işletmelerin IT altyapılarını yönetme ve kullanma şekillerini devrim niteliğinde değiştiren bir teknolojidir. Sunucular, depolama, veritabanları, ağ ve yazılım gibi bilişim hizmetlerinin internet üzerinden, yani "bulut" aracılığıyla sunulması anlamına gelir. Bu model, işletmelere esneklik, ölçeklenebilirlik ve maliyet avantajları sunar.
-                    </p>
-                    <p class="text-lg leading-relaxed text-gray-700 mb-6 reveal-item reveal-item-5">
-                        Bulut bilişimin en büyük faydalarından biri, başlangıç maliyetlerini düşürmesidir. Fiziksel donanım satın alma ve bakım maliyetlerinden kurtulan işletmeler, sadece kullandıkları hizmet kadar ödeme yaparlar. Ayrıca, bulut altyapıları sayesinde iş yükleri anlık olarak ölçeklenebilir, bu da ani talep artışlarına veya azalışlarına kolayca adapte olmayı sağlar. Güvenlik, veri yedekleme ve felaket kurtarma gibi konularda da bulut sağlayıcılarının sunduğu gelişmiş çözümler, işletmelerin veri güvenliğini artırır.
-                    </p>
-                    <p class="text-lg leading-relaxed text-gray-700 reveal-item reveal-item-6">
-                        ZeroSoft olarak, AWS, Azure ve Google Cloud gibi önde gelen bulut platformlarında uzmanlaşmış ekibimizle, işletmelerin bulut dönüşüm süreçlerinde stratejik danışmanlık ve uygulama hizmetleri sunuyoruz. Mevcut altyapıların buluta taşınmasından, bulut tabanlı yeni uygulamaların geliştirilmesine kadar her adımda yanınızdayız.
-                    </p>
-                    <a href="index.php?page=blog" class="btn-primary inline-block text-base mt-8 reveal-item reveal-item-7">
-                        <i class="fas fa-arrow-left mr-2"></i> Tüm Yazılara Geri Dön
-                    </a>
-                </div>
-            </section>
-        <?php
-        } elseif ($page === 'blog_ux') {
-        ?>
-            <section class="py-20 bg-gray-50">
-                <div class="container mx-auto px-4 max-w-3xl">
-                    <h2 class="section-title text-left reveal-item reveal-item-1">Mobil Uygulama Geliştirmede UX Önemi</h2>
-                    <p class="text-gray-600 text-left text-sm mb-6 reveal-item reveal-item-2">01 Temmuz 2024</p>
-                    <img src="https://placehold.co/800x400/A78BFA/FFFFFF?text=Mobil+UX+Detay" alt="Mobil Uygulama Geliştirmede UX Önemi Detay" class="rounded-lg mb-8 w-full object-cover reveal-item reveal-item-3">
-                    <p class="text-lg leading-relaxed text-gray-700 mb-6 reveal-item reveal-item-4">
-                        Mobil uygulama geliştirme dünyasında kullanıcı deneyimi (UX), uygulamanın başarısını doğrudan etkileyen kritik bir faktördür. Harika bir fikriniz ve güçlü bir teknik altyapınız olsa bile, eğer kullanıcılar uygulamanızı kolayca kullanamıyor, keyif almıyor veya hedeflerine ulaşamıyorsa, uygulamanızın benimsenmesi ve kalıcılığı zorlaşır. UX, kullanıcıların bir ürünle etkileşim kurarken yaşadıkları tüm deneyimi kapsar.
-                    </p>
-                    <p class="text-lg leading-relaxed text-gray-700 mb-6 reveal-item reveal-item-5">
-                        Mobil UX tasarımında hız, basitlik, tutarlılık ve erişilebilirlik temel prensiplerdir. Kullanıcıların sınırlı ekran alanında hızlıca işlem yapabilmesi, karmaşık menülerle boğuşmaması, uygulamanın farklı bölümlerinde aynı dil ve görsel tutarlılığı bulması ve engelli kullanıcılar için de erişilebilir olması büyük önem taşır. İyi bir UX, kullanıcı memnuniyetini artırır, uygulamanın tekrar kullanım oranını yükseltir ve olumlu ağızdan ağıza pazarlamayı teşvik eder.
-                    </p>
-                    <p class="text-lg leading-relaxed text-gray-700 reveal-item reveal-item-6">
-                        ZeroSoft olarak, mobil uygulama geliştirme süreçlerimizde UX'i projenin merkezine koyuyoruz. Detaylı kullanıcı araştırmaları, prototipleme, kullanıcı testleri ve sürekli geri bildirimlerle, sadece işlevsel değil, aynı zamanda kullanıcı dostu ve keyifli mobil deneyimler tasarlıyoruz. Uygulamalarımızın kullanıcılar tarafından sevilerek kullanılmasını sağlamak, bizim için en büyük önceliktir.
-                    </p>
-                    <a href="index.php?page=blog" class="btn-primary inline-block text-base mt-8 reveal-item reveal-item-7">
-                        <i class="fas fa-arrow-left mr-2"></i> Tüm Yazılara Geri Dön
-                    </a>
-                </div>
-            </section>
-        <?php
-        }
         else {
         ?>
-            <!-- Sayfa Bulunamadı İçeriği (404 Sayfası) -->
             <section class="py-20 bg-gray-50 text-center">
                 <div class="container">
                     <h2 class="section-title text-red-600 reveal-item reveal-item-1">404 - Sayfa Bulunamadı!</h2>
@@ -863,16 +686,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
         ?>
     </main>
 
-    <!-- Footer (Altbilgi) -->
     <footer class="bg-blue-900 text-white py-10 mt-auto rounded-t-3xl shadow-inner">
         <div class="container text-center">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Telif Hakkı -->
                 <div class="reveal-item reveal-item-1">
                     <p class="text-gray-400">&copy; <?php echo date('Y'); ?> ZeroSoft. Tüm Hakları Saklıdır.</p>
                 </div>
-                
-                <!-- Hızlı Bağlantılar -->
+
                 <div class="reveal-item reveal-item-2">
                     <h3 class="text-xl font-semibold mb-4">Hızlı Bağlantılar</h3>
                     <ul class="space-y-2">
@@ -882,12 +702,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
                         <li><a href="index.php?page=about" class="text-gray-400 hover:text-white transition duration-300">Hakkımızda</a></li>
                         <li><a href="index.php?page=blog" class="text-gray-400 hover:text-white transition duration-300">Blog</a></li>
                         <li><a href="index.php?page=faq" class="text-gray-400 hover:text-white transition duration-300">SSS</a></li>
-                        <!-- Kariyer linki kaldırıldı -->
                         <li><a href="index.php?page=contact" class="text-gray-400 hover:text-white transition duration-300">İletişim</a></li>
                     </ul>
                 </div>
 
-                <!-- İletişim Bilgileri -->
                 <div class="reveal-item reveal-item-3">
                     <h3 class="text-xl font-semibold mb-4">Bize Ulaşın</h3>
                     <ul class="space-y-2">
@@ -948,7 +766,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page === 'contact') {
                         item.classList.remove('open');
                         item.previousElementSibling.querySelector('.faq-icon').classList.remove('rotate');
                     });
-                    
+
                     answer.classList.add('open');
                     answer.style.maxHeight = answer.scrollHeight + "px"; // İçeriğin yüksekliğine göre ayarla
                     icon.classList.add('rotate');
